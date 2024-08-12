@@ -24,17 +24,36 @@ export default function App() {
     const { setIsAuthenticated } = useContext(AuthContext);
 
     // method to handle logout
-    const logout = () => {
-        //remove token and user on cookies
-        Cookies.remove('token');
-        Cookies.remove('user');
+const logout = async () => {
+    try {
+        // Call the logout API use vite.config
+        const response = await fetch('/api/logout', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include', // Ensure cookies (e.g., JWT) are sent with the request
+        });
 
-        //assign false to state "isAuthenticated"
-        setIsAuthenticated(false);
+        if (response.ok) {
+            // Successfully logged out
+            // Remove token and user on cookies
+            Cookies.remove('token');
+            Cookies.remove('user');
 
-        // redirect to login
-        navigate('/login', { replace: true });
-    };
+            // Assign false to state "isAuthenticated"
+            setIsAuthenticated(false);
+
+            // Redirect to login
+            navigate('/login', { replace: true });
+        } else {
+            // Handle the error, maybe show a message to the user
+            console.error('Failed to log out');
+        }
+    } catch (error) {
+        console.error('Logout error:', error);
+    }
+};
 
     return (
         <div>

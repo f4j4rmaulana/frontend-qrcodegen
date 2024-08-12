@@ -26,7 +26,7 @@ export default function Login() {
 
     //define state validation
     const [validation, setValidation] = useState([]);
-    const [loginFailed, setLoginFailed] = useState([]);
+    // const [loginFailed, setLoginFailed] = useState([]);
 
     //function "login"
     const login = async (e) => {
@@ -52,8 +52,8 @@ export default function Login() {
                 //assign error to state "validation"
                 setValidation(error.response.data);
 
-                //assign error to state "loginFailed"
-                setLoginFailed(error.response.data);
+                // //assign error to state "loginFailed"
+                // setLoginFailed(error.response.data);
             });
     };
 
@@ -75,7 +75,7 @@ export default function Login() {
                                 </ul>
                             </div>
                         )}
-                        {loginFailed.message && <div className="alert alert-danger mt-2">{loginFailed.message}</div>}
+                        {/* {loginFailed.message && <div className="alert alert-danger mt-2">{loginFailed.message}</div>} */}
                         <form onSubmit={login}>
                             <div className="form-group mb-3">
                                 <label className="mb-1 fw-bold">Email address</label>

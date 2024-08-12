@@ -171,7 +171,7 @@ export default function DocumentsIndex() {
                                     </tbody>
                                 </table>
                                 <div className="pagination d-flex align-items-center gap-1">
-                                    <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className="btn btn-primary">
+                                    <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1 || totalPages === 1} className="btn btn-primary">
                                         Previous
                                     </button>
                                     <span>
