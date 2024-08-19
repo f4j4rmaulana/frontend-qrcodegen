@@ -17,7 +17,7 @@ export default function Dashboard() {
         setSelectedFile(e.target.files[0]);
     };
 
-    console.log(token);
+    // console.log(token);
 
     const handleUpload = async (e) => {
         e.preventDefault();

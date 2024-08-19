@@ -22,7 +22,7 @@ export default function DocumentsIndex() {
     const fetchDataDocuments = async (page = 1) => {
         //get token from cookies inside the function to ensure it's up-to-date
         const token = Cookies.get('token');
-        console.log(token);
+        // console.log(token);
 
         if (token) {
             //set authorization header with token
