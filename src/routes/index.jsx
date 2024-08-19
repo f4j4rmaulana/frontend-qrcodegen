@@ -36,6 +36,15 @@ export default function AppRoutes() {
     //destructure context "isAuthenticated"
     const { isAuthenticated } = useContext(AuthContext);
 
+    const NotFound = () => {
+        return (
+          <>
+            <h1>404 - Page Not Found</h1>
+            <p>Sorry, the page you are looking for could not be found.</p>
+          </>
+        );
+      };
+
     return (
         <Routes>
             {/* route "/" */}
@@ -67,6 +76,10 @@ export default function AppRoutes() {
             <Route path="/admin/users/edit/:id" element={
                 isAuthenticated ? <UsersEdit /> : <Navigate to="/login" replace />
             } />
+
+            {/* This is where magic happens */}
+            <Route path="*" element={<NotFound />} />
+            
             </Routes>
     );
 }
