@@ -33,13 +33,21 @@ export default function Login() {
             });
 
             // Set token and user cookies
+            // Cookies.set('token', response.data.data.token, {
+            //     sameSite: 'None',
+            //     secure: window.location.protocol === 'https:', // Only set Secure if using HTTPS
+            // });
+            // Cookies.set('user', JSON.stringify(response.data.data.user), {
+            //     sameSite: 'None',
+            //     secure: window.location.protocol === 'https:', // Only set Secure if using HTTPS
+            // });
             Cookies.set('token', response.data.data.token, {
                 sameSite: 'None',
-                secure: window.location.protocol === 'https:', // Only set Secure if using HTTPS
+                secure: false, // Temporarily set this to false for local development
             });
             Cookies.set('user', JSON.stringify(response.data.data.user), {
                 sameSite: 'None',
-                secure: window.location.protocol === 'https:', // Only set Secure if using HTTPS
+                secure: false,
             });
 
             // Set authentication state
