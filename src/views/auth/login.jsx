@@ -1,60 +1,60 @@
-//import hook react
+// Import hooks from React and React Router
 import { useState, useContext } from 'react';
-
-//import hook useNavigate from react router dom
 import { useNavigate } from 'react-router-dom';
 
-//import services api
+// Import services and utilities
 import api from '../../services/api';
-
-//import js-cookie
 import Cookies from 'js-cookie';
-
-//import context
 import { AuthContext } from '../../context/AuthContext';
 
 export default function Login() {
-    //navigate
+    // Navigation hook
     const navigate = useNavigate();
 
-    //destructure context "setIsAuthenticated"
+    // Auth context
     const { setIsAuthenticated } = useContext(AuthContext);
 
-    //define state
+    // State for form inputs
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
-    //define state validation
+    // State for validation errors
     const [validation, setValidation] = useState([]);
-    // const [loginFailed, setLoginFailed] = useState([]);
 
-    //function "login"
+    // Login function
     const login = async (e) => {
         e.preventDefault();
-        //call api login
-        await api
-            .post('/api/login', {
-                email: email,
-                password: password,
-            })
-            .then((response) => {
-                // set token and user to cookie with SameSite=None; Secure
-                Cookies.set('token', response.data.data.token, { sameSite: 'None', secure: true });
-                Cookies.set('user', JSON.stringify(response.data.data.user), { sameSite: 'None', secure: true });
 
-                //assign true to state "isAuthenticated"
-                setIsAuthenticated(true);
-
-                //redirect ke halaman dashboard
-                navigate('/admin/dashboard', { replace: true });
-            })
-            .catch((error) => {
-                //assign error to state "validation"
-                setValidation(error.response.data);
-
-                // //assign error to state "loginFailed"
-                // setLoginFailed(error.response.data);
+        try {
+            // Call API to log in
+            const response = await api.post('/api/login', {
+                email,
+                password,
             });
+
+            // Set token and user cookies
+            Cookies.set('token', response.data.data.token, {
+                sameSite: 'None',
+                secure: window.location.protocol === 'https:', // Only set Secure if using HTTPS
+            });
+            Cookies.set('user', JSON.stringify(response.data.data.user), {
+                sameSite: 'None',
+                secure: window.location.protocol === 'https:', // Only set Secure if using HTTPS
+            });
+
+            // Set authentication state
+            setIsAuthenticated(true);
+
+            // Redirect to dashboard
+            navigate('/admin/dashboard', { replace: true });
+        } catch (error) {
+            // Set validation errors
+            if (error.response && error.response.data) {
+                setValidation(error.response.data);
+            } else {
+                setValidation([{ msg: 'An unexpected error occurred.' }]);
+            }
+        }
     };
 
     return (
@@ -75,16 +75,27 @@ export default function Login() {
                                 </ul>
                             </div>
                         )}
-                        {/* {loginFailed.message && <div className="alert alert-danger mt-2">{loginFailed.message}</div>} */}
                         <form onSubmit={login}>
                             <div className="form-group mb-3">
                                 <label className="mb-1 fw-bold">Email address</label>
-                                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="form-control" placeholder="Email Address" />
+                                <input
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className="form-control"
+                                    placeholder="Email Address"
+                                />
                             </div>
 
                             <div className="form-group mb-3">
                                 <label className="mb-1 fw-bold">Password</label>
-                                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="form-control" placeholder="Password" />
+                                <input
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="form-control"
+                                    placeholder="Password"
+                                />
                             </div>
                             <button type="submit" className="btn btn-primary w-100">
                                 LOGIN
