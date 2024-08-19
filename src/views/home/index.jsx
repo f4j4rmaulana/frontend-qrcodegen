@@ -8,9 +8,9 @@ export default function Home() {
                 <h1 className="display-5 fw-bold">QRCODE GENERATOR</h1>
                 <p className="col-md-12 fs-4">Badan Informasi Geospasial</p>
                 <hr />
-                <Link to="/register" className="btn btn-primary btn-lg me-3">
+                {/* <Link to="/register" className="btn btn-primary btn-lg me-3">
                     REGISTER
-                </Link>
+                </Link> */}
                 <Link to="/login" className="btn btn-secondary btn-lg">
                     LOGIN
                 </Link>

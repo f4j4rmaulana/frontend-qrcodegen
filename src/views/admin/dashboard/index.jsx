@@ -34,7 +34,7 @@ export default function Dashboard() {
             //console.log('Sending request with token:', token); // Log token
             //console.log('FormData content:', formData.get('pdf')); // Assuming the token is stored in localStorage
 
-            await axios.post('http://localhost:3001/api/admin/upload', formData, {
+            await axios.post('http://192.168.210.103:3001/api/admin/upload', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     Authorization: `${token}`,

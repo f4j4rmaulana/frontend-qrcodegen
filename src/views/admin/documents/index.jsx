@@ -144,12 +144,12 @@ export default function DocumentsIndex() {
                                                     <td>{document.originalFileName}</td>
                                                     <td>{document.barcodeFileName}</td>
                                                     <td>
-                                                        <a href={'http://localhost:3001/' + document.originalFilePath} target="_blank" rel="noopener noreferrer">
+                                                        <a href={'http://192.168.210.103/archive/' + document.originalFilePath} target="_blank" rel="noopener noreferrer">
                                                             Link
                                                         </a>
                                                     </td>
                                                     <td>
-                                                        <a href={'http://localhost:3001/' + document.path} target="_blank" rel="noopener noreferrer">
+                                                        <a href={'http://192.168.210.103/archive/' + document.path} target="_blank" rel="noopener noreferrer">
                                                             Link
                                                         </a>
                                                     </td>
