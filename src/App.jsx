@@ -1,75 +1,49 @@
-//import useContext
 import { useContext } from 'react';
 
-//import router
+// Import router
 import AppRoutes from './routes';
 
-//import Cookies dari 'js-cookie' untuk mengelola cookies
+// Import Cookies for managing cookies
 import Cookies from 'js-cookie';
 
-//import Link from react router dom
+// Import Link and useNavigate from react-router-dom
 import { Link, useNavigate } from 'react-router-dom';
 
-//import context
+// Import context
 import { AuthContext } from './context/AuthContext';
 
+// Import logo image
+import Logo from './assets/Logo-BIG-Putih.png';
+
 export default function App() {
-    // Menggunakan hook `useNavigate` untuk navigasi
+    // Using the `useNavigate` hook for navigation
     const navigate = useNavigate();
 
-    //destructure context "isAuthenticated"
+    // Destructure context "isAuthenticated"
     const { isAuthenticated } = useContext(AuthContext);
 
-    //destructure context "setIsAuthenticated"
+    // Destructure context "setIsAuthenticated"
     const { setIsAuthenticated } = useContext(AuthContext);
 
-    // method to handle logout
-const logout = async () => {
-    // try {
-    //     // Call the logout API use vite.config
-    //     const response = await fetch('/api/logout', {
-    //         method: 'POST',
-    //         headers: {
-    //             'Content-Type': 'application/json',
-    //         },
-    //         credentials: 'include', // Ensure cookies (e.g., JWT) are sent with the request
-    //     });
+    // Method to handle logout
+    const logout = async () => {
+        // Remove token and user on cookies
+        Cookies.remove('token');
+        Cookies.remove('user');
 
-    //     if (response.ok) {
-    //         // Successfully logged out
-    //         // Remove token and user on cookies
-    //         Cookies.remove('token');
-    //         Cookies.remove('user');
+        // Assign false to state "isAuthenticated"
+        setIsAuthenticated(false);
 
-    //         // Assign false to state "isAuthenticated"
-    //         setIsAuthenticated(false);
-
-    //         // Redirect to login
-    //         navigate('/login', { replace: true });
-    //     } else {
-    //         // Handle the error, maybe show a message to the user
-    //         console.error('Failed to log out');
-    //     }
-    // } catch (error) {
-    //     console.error('Logout error:', error);
-    // }
-     //remove token and user on cookies
-     Cookies.remove('token');
-     Cookies.remove('user');
-
-     //assign false to state "isAuthenticated"
-     setIsAuthenticated(false);
-
-     // redirect to login
-     navigate("/login", { replace: true });
-};
+        // Redirect to login
+        navigate("/login", { replace: true });
+    };
 
     return (
         <div>
             <nav className="navbar navbar-expand-lg bg-dark" data-bs-theme="dark">
                 <div className="container-fluid">
                     <Link to="/" className="navbar-brand">
-                        HOME
+                        <img src={Logo} alt="BIG Logo" style={{ height: '40px' }} />
                     </Link>
                     <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                         <span className="navbar-toggler-icon"></span>
