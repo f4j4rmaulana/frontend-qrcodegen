@@ -1,40 +1,27 @@
-//import useState dan useEffect
 import { useState, useEffect } from 'react';
-
-//import SidebarMenu
 import SidebarMenu from '../../../components/SidebarMenu';
-
-//import js cookie
 import Cookies from 'js-cookie';
-
-//import api
+import '../../../../src/style.css';
 import api from '../../../services/api';
 
 export default function DocumentsIndex() {
-    //ini state "documents"
     const [documents, setDocuments] = useState([]);
-    const [message, setMessage] = useState(''); // State for success message
-    const [currentPage, setCurrentPage] = useState(1); // State for current page
-    const [totalPages, setTotalPages] = useState(1); // State for total pages
-    const [limit, setLimit] = useState(10); // State for limit of documents per page
+    const [message, setMessage] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [limit, setLimit] = useState(10);
+    const [searchQuery, setSearchQuery] = useState('');
 
-    //define method "fetchDataDocuments"
     const fetchDataDocuments = async (page = 1) => {
-        //get token from cookies inside the function to ensure it's up-to-date
         const token = Cookies.get('token');
-        // console.log(token);
-
         if (token) {
-            //set authorization header with token
             api.defaults.headers.common['Authorization'] = token;
 
-            //fetch data from API with Axios
             try {
-                const response = await api.get(`/api/admin/documents?page=${page}&limit=${limit}`);
-                //assign response data to state "documents"
+                const response = await api.get(`/api/admin/documents?page=${page}&limit=${limit}&search=${searchQuery}`);
                 setDocuments(response.data.data);
-                setCurrentPage(response.data.currentPage); // assuming your backend sends current page
-                setTotalPages(response.data.totalPages); // assuming your backend sends total pages
+                setCurrentPage(response.data.currentPage);
+                setTotalPages(response.data.totalPages);
             } catch (error) {
                 console.error('There was an error fetching the document!', error);
             }
@@ -43,39 +30,30 @@ export default function DocumentsIndex() {
         }
     };
 
-    //run hook useEffect
     useEffect(() => {
-        //call method "fetchDataDocuments"
-        fetchDataDocuments();
-    }, [limit]);
+        const timeoutId = setTimeout(() => {
+            fetchDataDocuments(1);
+        }, 500); // Delay search to prevent too many API calls
 
-    //define method "deleteDocument"
+        return () => clearTimeout(timeoutId);
+    }, [searchQuery, limit]);
+
     const deleteDocument = async (id) => {
-        // Show confirmation dialog
         const confirmed = window.confirm('Are you sure you want to delete this document?');
 
         if (!confirmed) {
             return;
         }
 
-        //get token from cookies inside the function to ensure it's up-to-date
         const token = Cookies.get('token');
 
         if (token) {
-            //set authorization header with token
             api.defaults.headers.common['Authorization'] = token;
 
             try {
-                //fetch data from API with Axios
                 await api.delete(`/api/admin/documents/${id}`);
-
-                //call method "fetchDataDocuments"
                 fetchDataDocuments(currentPage);
-
-                //set success message
                 setMessage('Document deleted successfully');
-
-                //clear message after 3 seconds
                 setTimeout(() => setMessage(''), 3000);
             } catch (error) {
                 console.error('There was an error deleting the document!', error);
@@ -85,14 +63,17 @@ export default function DocumentsIndex() {
         }
     };
 
-    //define method to handle page change
     const handlePageChange = (page) => {
         fetchDataDocuments(page);
     };
 
-    //define method to handle limit change
     const handleLimitChange = (event) => {
         setLimit(parseInt(event.target.value));
+    };
+
+    const formatDate = (dateString) => {
+        const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+        return new Date(dateString).toLocaleDateString(undefined, options);
     };
 
     return (
@@ -112,48 +93,65 @@ export default function DocumentsIndex() {
                                     {message}
                                 </div>
                             )}
-                            <div className="mb-3">
-                                <label htmlFor="limit" className="form-label">
-                                    Documents per page
-                                </label>
-                                <select id="limit" className="form-select" value={limit} onChange={handleLimitChange}>
-                                    <option value="5">5</option>
-                                    <option value="10">10</option>
-                                    <option value="15">15</option>
-                                    <option value="20">20</option>
-                                </select>
+                            <div className="mb-3 d-flex justify-content-between">
+                                <div>
+                                    <label htmlFor="limit" className="form-label">
+                                        Documents per page
+                                    </label>
+                                    <select id="limit" className="form-select" value={limit} onChange={handleLimitChange}>
+                                        <option value="5">5</option>
+                                        <option value="10">10</option>
+                                        <option value="15">15</option>
+                                        <option value="20">20</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label htmlFor="search" className="form-label">
+                                        Search
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="search"
+                                        className="form-control"
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        placeholder="Search documents..."
+                                    />
+                                </div>
                             </div>
                             <div className="table-responsive">
                                 <table className="table table-sm">
                                     <thead className="bg-dark text-white">
                                         <tr>
-                                            <th scope="col">Original File Name</th>
-                                            <th scope="col">Barcode File Name</th>
+                                            <th scope="col">No</th>
+                                            <th scope="col" className="text-wrap">Original File Name</th>
+                                            <th scope="col" className="text-wrap">Barcode File Name</th>
                                             <th scope="col">Original File Path</th>
                                             <th scope="col">Barcode File Path</th>
                                             <th scope="col">Created By</th>
-                                            <th scope="col" style={{ width: '17%' }}>
-                                                Actions
-                                            </th>
+                                            <th scope="col">Created At</th> {/* New header for createdAt */}
+                                            <th scope="col" style={{ width: '17%' }}>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {documents.length > 0 ? (
                                             documents.map((document, index) => (
                                                 <tr key={index}>
-                                                    <td>{document.originalFileName}</td>
-                                                    <td>{document.barcodeFileName}</td>
+                                                    <td>{(currentPage - 1) * limit + index + 1}</td>
+                                                    <td className="text-wrap">{document.originalFileName}</td>
+                                                    <td className="text-wrap">{document.barcodeFileName}</td>
                                                     <td>
-                                                        <a href={'http://192.168.210.103/archive/' + document.originalFilePath} target="_blank" rel="noopener noreferrer">
+                                                        <a href={`http://192.168.210.103:3001/archive/` + document.originalFilePath} target="_blank" rel="noopener noreferrer">
                                                             Link
                                                         </a>
                                                     </td>
                                                     <td>
-                                                        <a href={'http://192.168.210.103/archive/' + document.path} target="_blank" rel="noopener noreferrer">
+                                                        <a href={`http://192.168.210.103:3001/archive/` + document.path} target="_blank" rel="noopener noreferrer">
                                                             Link
                                                         </a>
                                                     </td>
                                                     <td>{document.userName}</td>
+                                                    <td>{formatDate(document.createdAt)}</td> {/* Updated row for createdAt */}
                                                     <td className="text-center">
                                                         <button onClick={() => deleteDocument(document.id)} className="btn btn-sm btn-danger rounded-sm shadow border-0">
                                                             Delete
@@ -163,8 +161,8 @@ export default function DocumentsIndex() {
                                             ))
                                         ) : (
                                             <tr>
-                                                <td colSpan="6" className="text-center">
-                                                    <div className="alert alert-danger mb-0">Data Belum Tersedia!</div>
+                                                <td colSpan="8" className="text-center"> {/* Updated colspan to 8 */}
+                                                    <div className="alert alert-danger mb-0">No documents found matching your search criteria!</div>
                                                 </td>
                                             </tr>
                                         )}
@@ -182,6 +180,7 @@ export default function DocumentsIndex() {
                                     </button>
                                 </div>
                             </div>
+
                         </div>
                     </div>
                 </div>
