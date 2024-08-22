@@ -48,7 +48,7 @@ export default function AppRoutes() {
     return (
         <Routes>
             {/* route "/" */}
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={isAuthenticated ? <Navigate to="/admin/dashboard" replace /> : <Home />} />
 
             {/* route "/register" */}
             <Route path="/register" element={isAuthenticated ? <Navigate to="/admin/dashboard" replace /> : <Register />} />
