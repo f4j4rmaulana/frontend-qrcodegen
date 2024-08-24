@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const Api = axios.create({
     //set default endpoint API
-    baseURL: 'http://192.168.210.103:3001',
+    baseURL: import.meta.env.VITE_API_URL,
 });
 
 export default Api;

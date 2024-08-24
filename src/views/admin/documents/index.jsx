@@ -141,12 +141,12 @@ export default function DocumentsIndex() {
                                                     <td className="text-wrap">{document.originalFileName}</td>
                                                     <td className="text-wrap">{document.barcodeFileName}</td>
                                                     <td>
-                                                        <a href={`http://192.168.210.103:3001/archive/` + document.originalFilePath} target="_blank" rel="noopener noreferrer">
+                                                        <a href={`${import.meta.env.VITE_BASE_URL}/archive/` + document.originalFilePath} target="_blank" rel="noopener noreferrer">
                                                             Link
                                                         </a>
                                                     </td>
                                                     <td>
-                                                        <a href={`http://192.168.210.103:3001/archive/` + document.path} target="_blank" rel="noopener noreferrer">
+                                                        <a href={`${import.meta.env.VITE_BASE_URL}/archive/` + document.path} target="_blank" rel="noopener noreferrer">
                                                             Link
                                                         </a>
                                                     </td>
