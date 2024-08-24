@@ -34,7 +34,7 @@ export default function Dashboard() {
             //console.log('Sending request with token:', token); // Log token
             //console.log('FormData content:', formData.get('pdf')); // Assuming the token is stored in localStorage
 
-            await axios.post(`${import.meta.env.VITE_BASE_URL}/api/admin/upload`, formData, {
+            await axios.post(`${import.meta.env.VITE_API_URL}/api/admin/upload`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     Authorization: `${token}`,
