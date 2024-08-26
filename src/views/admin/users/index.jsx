@@ -1,15 +1,7 @@
 import { useState, useEffect } from 'react';
-
-//import SidebarMenu
 import SidebarMenu from '../../../components/SidebarMenu';
-
-//import Link
 import { Link } from 'react-router-dom';
-
-//import js cookie
 import Cookies from 'js-cookie';
-
-//import api
 import api from '../../../services/api';
 
 export default function UsersIndex() {
@@ -20,26 +12,24 @@ export default function UsersIndex() {
     const [errorMsg, setErrorMsg] = useState('');
 
     // Pagination states
-    const [currentPage, setCurrentPage] = useState(1); // State for current page
-    const [totalPages, setTotalPages] = useState(1); // State for total pages
-    const [limit, setLimit] = useState(10); // State for limit of documents per page
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [limit, setLimit] = useState(10);
+
+    // Search state
+    const [searchQuery, setSearchQuery] = useState('');
 
     // Fetch users data with pagination
     const fetchDataUsers = async (page = 1) => {
-        // Get token from cookies inside the function to ensure it's up-to-date
         const token = Cookies.get('token');
 
         if (token) {
-            // Set authorization header with token
             api.defaults.headers.common['Authorization'] = token;
 
             try {
-                // Fetch data from API with Axios, including pagination parameters
-                const response = await api.get(`/api/admin/users?page=${page}&limit=${limit}`);
-
-                // Assign response data to state "users"
+                const response = await api.get(`/api/admin/users?page=${page}&limit=${limit}&search=${searchQuery}`);
                 setUsers(response.data.data);
-                setCurrentPage(response.data.currentPage); // assuming your backend sends current page, fallback to page
+                setCurrentPage(response.data.currentPage);
                 setTotalPages(response.data.totalPages);
 
             } catch (error) {
@@ -51,32 +41,29 @@ export default function UsersIndex() {
         }
     };
 
-    // Run hook useEffect to fetch users on component mount and when currentPage or limit changes
     useEffect(() => {
-        fetchDataUsers();
-    }, [limit]);
+        const timeoutId = setTimeout(() => {
+            fetchDataUsers(1);
+        }, 500); // Delay search to prevent too many API calls
 
+        return () => clearTimeout(timeoutId);
+    }, [searchQuery, limit]);
 
-    // Define method "deleteUser"
     const deleteUser = async (id) => {
-        // Get token from cookies inside the function to ensure it's up-to-date
+        const confirmed = window.confirm("Are you sure you want to delete this user?");
+        if (!confirmed) return;
+
         const token = Cookies.get('token');
 
         if (token) {
-            // Set authorization header with token
             api.defaults.headers.common['Authorization'] = token;
 
             try {
-                // Delete user by ID
                 await api.delete(`/api/admin/users/${id}`);
-
-                // Refresh user list after deletion
                 fetchDataUsers(currentPage);
-
                 alert("User deleted successfully");
 
             } catch (error) {
-                // Assign error message to state errorMsg
                 setErrorMsg(error.response?.data?.message || 'An error occurred while deleting the user.');
             }
         } else {
@@ -84,18 +71,16 @@ export default function UsersIndex() {
         }
     };
 
-    // Handle page change
     const handlePageChange = (page) => {
-      fetchDataUsers(page);
-  };
+        fetchDataUsers(page);
+    };
 
-    // Handle limit change
     const handleLimitChange = (event) => {
-      const newLimit = parseInt(event.target.value);
-      setLimit(newLimit);
-      setCurrentPage(1); // Reset to first page when limit changes
-      fetchDataUsers(1); // Fetch first page of users with new limit
-  };
+        const newLimit = parseInt(event.target.value);
+        setLimit(newLimit);
+        setCurrentPage(1);
+        fetchDataUsers(1);
+    };
 
     return (
         <div className="container-fluid mt-5 mb-5">
@@ -117,20 +102,36 @@ export default function UsersIndex() {
                                     </div>
                                 )
                             }
-                            <div className="mb-3">
-                                <label htmlFor="limit" className="form-label">
-                                    Users per page
-                                </label>
-                                <select id="limit" className="form-select" value={limit} onChange={handleLimitChange}>
-                                    <option value="5">5</option>
-                                    <option value="10">10</option>
-                                    <option value="15">15</option>
-                                    <option value="20">20</option>
-                                </select>
+                            <div className="mb-3 d-flex justify-content-between">
+                                <div>
+                                    <label htmlFor="limit" className="form-label">
+                                        Users per page
+                                    </label>
+                                    <select id="limit" className="form-select" value={limit} onChange={handleLimitChange}>
+                                        <option value="5">5</option>
+                                        <option value="10">10</option>
+                                        <option value="15">15</option>
+                                        <option value="20">20</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label htmlFor="search" className="form-label">
+                                        Search
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="search"
+                                        className="form-control"
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        placeholder="Search users..."
+                                    />
+                                </div>
                             </div>
                             <table className="table table-bordered">
                                 <thead className="bg-dark text-white">
                                     <tr>
+                                        <th scope="col">No</th> {/* New column for numbering */}
                                         <th scope="col">Full Name</th>
                                         <th scope="col">Email Address</th>
                                         <th scope="col" style={{ width: "17%" }}>Actions</th>
@@ -141,17 +142,14 @@ export default function UsersIndex() {
                                         users.length > 0
                                             ? users.map((user, index) => (
                                                 <tr key={index}>
+                                                    <td>{(currentPage - 1) * limit + index + 1}</td> {/* Row number */}
                                                     <td>{user.name}</td>
                                                     <td>{user.email}</td>
                                                     <td className="text-center">
                                                         <Link to={`/admin/users/edit/${user.id}`} className="btn btn-sm btn-primary rounded-sm shadow border-0 me-2">EDIT</Link>
-                                                        <button 
-                                                            className="btn btn-sm btn-danger rounded-sm shadow border-0" 
-                                                            onClick={() => {
-                                                                if (window.confirm("Are you sure you want to delete this user?")) {
-                                                                    deleteUser(user.id);
-                                                                }
-                                                            }}
+                                                        <button
+                                                            className="btn btn-sm btn-danger rounded-sm shadow border-0"
+                                                            onClick={() => deleteUser(user.id)}
                                                         >
                                                             DELETE
                                                         </button>
@@ -159,7 +157,7 @@ export default function UsersIndex() {
                                                 </tr>
                                             ))
                                             : <tr>
-                                                <td colSpan="3" className="text-center">
+                                                <td colSpan="4" className="text-center"> {/* Updated colspan to 4 to match the new column */}
                                                     <div className="alert alert-danger mb-0">
                                                         No Users Available!
                                                     </div>
@@ -169,20 +167,20 @@ export default function UsersIndex() {
                                 </tbody>
                             </table>
                             <div className="pagination d-flex align-items-center gap-1">
-                                    <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1 || totalPages === 1} className="btn btn-primary">
-                                        Previous
-                                    </button>
-                                    <span>
-                                        {currentPage} / {totalPages}
-                                    </span>
-                                    <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} className="btn btn-primary">
-                                        Next
-                                    </button>
+                                <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1 || totalPages === 1} className="btn btn-primary">
+                                    Previous
+                                </button>
+                                <span>
+                                    {currentPage} / {totalPages}
+                                </span>
+                                <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} className="btn btn-primary">
+                                    Next
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    )
+    );
 }
