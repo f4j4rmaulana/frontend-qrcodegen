@@ -1,19 +1,27 @@
-import { useState, useEffect } from 'react';
+// Import dependensi yang diperlukan
+import { useState, useEffect, useCallback } from 'react';
 import SidebarMenu from '../../../components/SidebarMenu';
 import Cookies from 'js-cookie';
 import '../../../../src/style.css';
 import api from '../../../services/api';
 
 export default function DocumentsIndex() {
+    // State untuk dokumen
     const [documents, setDocuments] = useState([]);
+
+    // State untuk pesan
     const [message, setMessage] = useState('');
+
+    // State untuk pagination
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [limit, setLimit] = useState(10);
     const [searchQuery, setSearchQuery] = useState('');
 
-    const fetchDataDocuments = async (page = 1) => {
+    // Fungsi untuk mengambil data dokumen dengan pagination dan pencarian
+    const fetchDataDocuments = useCallback(async (page = 1) => {
         const token = Cookies.get('token');
+
         if (token) {
             api.defaults.headers.common['Authorization'] = token;
 
@@ -23,21 +31,24 @@ export default function DocumentsIndex() {
                 setCurrentPage(response.data.currentPage);
                 setTotalPages(response.data.totalPages);
             } catch (error) {
-                console.error('There was an error fetching the document!', error);
+                console.error('There was an error fetching the documents!', error);
+                setMessage(error.response?.data?.message || 'An error occurred while fetching documents.');
             }
         } else {
             console.error('Token is not available!');
         }
-    };
+    }, [limit, searchQuery]); // Tambahkan 'limit' dan 'searchQuery' sebagai dependensi
 
+    // useEffect untuk mengambil data dokumen saat komponen pertama kali dimuat atau saat 'searchQuery' atau 'limit' berubah
     useEffect(() => {
         const timeoutId = setTimeout(() => {
             fetchDataDocuments(1);
-        }, 500); // Delay search to prevent too many API calls
+        }, 500); // Delay search untuk mencegah terlalu banyak panggilan API
 
         return () => clearTimeout(timeoutId);
-    }, [searchQuery, limit]);
+    }, [fetchDataDocuments]); // Tambahkan 'fetchDataDocuments' sebagai dependensi
 
+    // Fungsi untuk menghapus dokumen
     const deleteDocument = async (id) => {
         const confirmed = window.confirm('Are you sure you want to delete this document?');
 
@@ -57,6 +68,8 @@ export default function DocumentsIndex() {
                 setTimeout(() => setMessage(''), 3000);
             } catch (error) {
                 console.error('There was an error deleting the document!', error);
+                setMessage(error.response?.data?.message || 'An error occurred while deleting the document.');
+                setTimeout(() => setMessage(''), 3000);
             }
         } else {
             console.error('Token is not available!');
@@ -68,7 +81,10 @@ export default function DocumentsIndex() {
     };
 
     const handleLimitChange = (event) => {
-        setLimit(parseInt(event.target.value));
+        const newLimit = parseInt(event.target.value);
+        setLimit(newLimit);
+        setCurrentPage(1);
+        fetchDataDocuments(1);
     };
 
     const formatDate = (dateString) => {
@@ -153,6 +169,7 @@ export default function DocumentsIndex() {
                                                     <td>{document.userName}</td>
                                                     <td>{formatDate(document.createdAt)}</td> {/* Updated row for createdAt */}
                                                     <td className="text-center">
+                                                        {/* Tampilkan tombol DELETE jika pengguna memiliki izin */}
                                                         <button onClick={() => deleteDocument(document.id)} className="btn btn-sm btn-danger rounded-sm shadow border-0">
                                                             Delete
                                                         </button>

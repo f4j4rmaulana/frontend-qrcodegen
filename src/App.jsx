@@ -1,40 +1,25 @@
-import { useContext } from 'react';
-
-// Import router
+import { useContext} from 'react';
 import AppRoutes from './routes';
-
-// Import Cookies for managing cookies
 import Cookies from 'js-cookie';
-
-// Import Link and useNavigate from react-router-dom
 import { Link, useNavigate } from 'react-router-dom';
-
-// Import context
 import { AuthContext } from './context/AuthContext';
-
-// Import logo image
 import Logo from './assets/Logo-BIG-Putih.png';
 
 export default function App() {
-    // Using the `useNavigate` hook for navigation
     const navigate = useNavigate();
+    const { isAuthenticated, setIsAuthenticated, resetStates } = useContext(AuthContext);
 
-    // Destructure context "isAuthenticated"
-    const { isAuthenticated } = useContext(AuthContext);
+    // State to store the logged-in user's information
+    const user = (() => {
+        const userData = Cookies.get('user');
+        return userData ? JSON.parse(userData) : null;
+    })(); // Immediately invoked function to initialize `user`
 
-    // Destructure context "setIsAuthenticated"
-    const { setIsAuthenticated } = useContext(AuthContext);
-
-    // Method to handle logout
     const logout = async () => {
-        // Remove token and user on cookies
         Cookies.remove('token');
         Cookies.remove('user');
-
-        // Assign false to state "isAuthenticated"
         setIsAuthenticated(false);
-
-        // Redirect to login
+        resetStates();
         navigate("/login", { replace: true });
     };
 
@@ -50,11 +35,23 @@ export default function App() {
                     </button>
                     <div className="collapse navbar-collapse" id="navbarSupportedContent">
                         <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
-                            {isAuthenticated ? (
-                                <li className="nav-item">
-                                    <a onClick={logout} style={{ cursor: 'pointer' }} className="nav-link active" aria-current="page">
-                                        Logout
+                            {isAuthenticated && user ? (
+                                <li className="nav-item dropdown">
+                                    <a className="nav-link dropdown-toggle fw-bolder" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        {user.name} {/* Display logged-in user's name */}
                                     </a>
+                                    <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                        <li>
+                                            <Link to="/change-password" className="dropdown-item">
+                                                Change Password
+                                            </Link>
+                                        </li>
+                                        <li>
+                                            <a onClick={logout} style={{ cursor: 'pointer' }} className="dropdown-item">
+                                                Logout
+                                            </a>
+                                        </li>
+                                    </ul>
                                 </li>
                             ) : null}
                         </ul>

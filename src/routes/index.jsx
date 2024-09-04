@@ -31,6 +31,8 @@ import UsersCreate from "../views/admin/users/create.jsx";
 //import view users edit
 import UsersEdit from "../views/admin/users/edit.jsx";
 
+import ChangePassword from '../components/ChangePassword.jsx';
+
 export default function AppRoutes() {
 
     //destructure context "isAuthenticated"
@@ -75,6 +77,10 @@ export default function AppRoutes() {
             {/* route "/admin/users/edit/:id" */}
             <Route path="/admin/users/edit/:id" element={
                 isAuthenticated ? <UsersEdit /> : <Navigate to="/login" replace />
+            } />
+
+            <Route path="/change-password" element={
+                isAuthenticated ? <ChangePassword /> : <Navigate to="/login" replace />
             } />
 
             {/* This is where magic happens */}
